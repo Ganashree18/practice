@@ -17,6 +17,8 @@ import (
 	"gorm.io/datatypes"
 )
 
+
+
 func istTOutc(t time.Time) time.Time {
 	ist, _ := time.LoadLocation("Asia/Kolkata")
 	return t.In(ist).UTC()
@@ -1142,3 +1144,7 @@ func AddEnquiry(c *gin.Context){
 // // 	c.JSON(http.StatusOK, gin.H{"message": "Added enquiry " + r.Name + " " + fmt.Sprint(r.ID)})
 
 // }
+
+func done(){
+	fmt.Println("Haiiii")
+}
