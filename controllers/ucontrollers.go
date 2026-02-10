@@ -10,14 +10,12 @@ import (
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/datatypes"
 )
-
-
 
 func istTOutc(t time.Time) time.Time {
 	ist, _ := time.LoadLocation("Asia/Kolkata")
@@ -57,7 +55,6 @@ func CreateStudent(c *gin.Context) {
 	students.CreatedUTC = tnow.AddDate(0, 0, 10)
 	c.JSON(http.StatusOK, gin.H{"message": " student added successsfully"})
 }
-
 
 // func GetStudents(c *gin.Context){
 // 	var students []models.Student
@@ -283,28 +280,27 @@ func UploadFile(c *gin.Context) {
 	})
 
 }
- 
-func ChangePaswd(c *gin.Context){
-	var ip struct{
-		Id int `json:"id"`	
+
+func ChangePaswd(c *gin.Context) {
+	var ip struct {
+		Id       int    `json:"id"`
 		Password string `json:"password"`
 	}
-	if err:= c.ShouldBindJSON(&ip); err!=nil{
-		c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
+	if err := c.ShouldBindJSON(&ip); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	
+
 	hPass, err := bcrypt.GenerateFromPassword([]byte(ip.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Password hashing failed"})
 		return
 	}
 	ip.Password = string(hPass)
-	
-    db.DB.Debug().Raw("update students set password = ? where id = ?",ip.Password, ip.Id).Scan(&models.Student{})
+
+	db.DB.Debug().Raw("update students set password = ? where id = ?", ip.Password, ip.Id).Scan(&models.Student{})
 	c.JSON(http.StatusOK, gin.H{"message": "Enquiry registered successfully"})
 
 }
-
 
 func CreateEnquiry(c *gin.Context) {
 	var enquiries models.Enquiry
@@ -330,78 +326,70 @@ func CreateEnquiry(c *gin.Context) {
 // 			Phone string   `json:"phone"`
 // 		}  `json:"contact"`
 
-// 		Email struct{
-// 			Email string    `json:"email"`
-// 		}  `json:"email"`
-// 		Referral struct{
-// 			Email string    `json:"email"`
-// 		}  `json:"referral"`
-// 		}
-// 	}
+//		Email struct{
+//			Email string    `json:"email"`
+//		}  `json:"email"`
+//		Referral struct{
+//			Email string    `json:"email"`
+//		}  `json:"referral"`
+//		}
+//	}
+//
 // // type Email struct{
 // // 	Email string `json:"email"`
 // // }
-func AddEnquiry(c *gin.Context){
+func AddEnquiry(c *gin.Context) {
 	var ip models.Enquiry
 	if err := c.ShouldBindJSON(&ip); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(),})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	enquiry := models.Enquiry{
-	Name:           ip.Name,
-	Email:          ip.Email,
-	Contact:        ip.Contact,
-	College:        ip.College,
-	Yop:            ip.Yop,
-	Degree:         ip.Degree,
-	EnquiredCourse: ip.EnquiredCourse,
-	Referral:       ip.Referral,
+		Name:           ip.Name,
+		Email:          ip.Email,
+		Contact:        ip.Contact,
+		College:        ip.College,
+		Yop:            ip.Yop,
+		Degree:         ip.Degree,
+		EnquiredCourse: ip.EnquiredCourse,
+		Referral:       ip.Referral,
 	}
 
-	type course []struct{
-		Cid uint `json:"cid"`
+	type course []struct {
+		Cid   uint   `json:"cid"`
 		CName string `json:"cname"`
 	}
-	type email struct{
-		
+	type email struct {
 		Email uint `json:"email"`
 	}
 
-
 	var ecourse course
 	json.Unmarshal(enquiry.EnquiredCourse, &ecourse)
-	for i, j := range ecourse {
-		fmt.Println(j)	
+	for _, j := range ecourse {
+		fmt.Println(j)
 	}
 	fmt.Println(ecourse)
 	marshalcourse, _ := json.Marshal(ecourse)
 
-	db.DB.Debug().Raw("update enquiries set , enquiredcourse = ?, email = ?, phone = ? where id = ?", marshalcourse, marshalemail,  input.Id).Scan(&models.Enquiry{})
-
-
+	db.DB.Debug().Raw("update enquiries set , enquiredcourse = ?, email = ?, phone = ? where id = ?", marshalcourse, ip.Id).Scan(&models.Enquiry{})
 
 	var eemail []email
 	json.Unmarshal(enquiry.Email, &eemail)
-	for i, j := range eemail {
+	for _, j := range eemail {
 		fmt.Println(j)
-		
-		
+
 	}
 	marshalemail, _ := json.Marshal(eemail)
 
-	db.DB.Debug().Raw("update enquiries set  , enquiredcourse = ?, email = ?, phone = ? where id = ?", marshalcourse, marshalemail,  input.Id).Scan(&models.Enquiry{})
-
-
+	db.DB.Debug().Raw("update enquiries set  , enquiredcourse = ?, email = ?, phone = ? where id = ?", marshalcourse, marshalemail, ip.Id).Scan(&models.Enquiry{})
 
 	if err := db.DB.Create(&enquiry).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create enquiry",})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create enquiry"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Enquiry added successfully","data":enquiry})
+	c.JSON(http.StatusOK, gin.H{"message": "Enquiry added successfully", "data": enquiry})
 }
-
-
 
 // func AddEnquiryy(c *gin.Context) {
 // 	user, _ := c.Get("user")
@@ -451,12 +439,12 @@ func AddEnquiry(c *gin.Context){
 // 	var usercourse []struct {
 // 		Cid int  `json:"cid"`
 // 		Cname string   `json:"cname"`
-// // 		
+// //
 // 	}
 // 	var useremail []struct {
-		
+
 // 		Email string   `json:"email"`
-// // 		
+// //
 // 	}
 // // 	var roles []Role
 // 	json.Unmarshal(ue, &useremail)
@@ -506,13 +494,13 @@ func AddEnquiry(c *gin.Context){
 // 		Ref_code   string `json:"ref_code"`
 // 		Ref_phone string `json:"ref_phone"`
 // 		Ref_name   string `json:"ref_name"`
-		
+
 // 	}
 // 	var refers []struct {
 // 		Ref_code   string `json:"ref_code"`
 // 		Ref_phone string `json:"ref_phone"`
 // 		Ref_name   string `json:"ref_name"`
-		
+
 // 	}
 // // 	// var cons []Contacts
 // // 	// var mails []Emails
@@ -1145,6 +1133,6 @@ func AddEnquiry(c *gin.Context){
 
 // }
 
-func done(){
+func done() {
 	fmt.Println("Haiiii")
 }
